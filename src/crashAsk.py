@@ -60,26 +60,45 @@ def get_ok_symbols():
     return exchange.symbols
 
 
-def human_to_unixtime(datestr, format='%Y/%m/%d %H:%M'):
+def human_to_unixtime(datestr, format='%Y/%m/%d %H:%M:%S'):
     """将人类时间字符串转换为 Unix 时间戳"""
     dt = datetime.datetime.strptime(datestr, format)
-    return int(time.mktime(dt.timetuple()))
+    return dt.timestamp()
 
 def compare_time(target_time):
     """比较指定时间和当前时间的先后顺序，如果当前时间等于或晚于指定时间，返回 True，否则返回 False"""
     current_time = datetime.datetime.now()
-    if current_time >= target_time:
+    current_time = current_time.timestamp()
+    if current_time >= int(target_time):
         return True
     else:
         return False
 
+def format_timedelta(td):
+    """格式化 timedelta 为字符串"""
+    days, seconds = td.days, td.seconds
+    hours = seconds // 3600
+    minutes = (seconds % 3600) // 60
+    seconds = seconds % 60
+    return f"{days}天 {hours}小时 {minutes}分钟 {seconds}秒"
 
+def countdown():
+    targetTime = human_to_unixtime(config.StartTime)
+    while not compare_time(targetTime):
+        #print("等待时间未到达...")
+        last_time = targetTime - int(time.time())
+        dt = datetime.datetime.now() + datetime.timedelta(seconds=last_time)
+        delta = dt - datetime.datetime.now()
+        format_last_time_string = format_timedelta(delta)
+        print("距离开始还差:{}".format(format_last_time_string), end="\r")
+        time.sleep(1)
 def testMain():
     print('testMain')
-    bid_price, ask_price = get_ticker()
-    print('bid_price', bid_price)
-    print('ask_price', ask_price)
-    print("test ok symbols")
+    #bid_price, ask_price = get_ticker()
+    #print('bid_price', bid_price)
+    #print('ask_price', ask_price)
+    print("test countdown")
+    countdown()
     #print("symbols", get_ok_symbols())
     # order_id = place_sell_order(amount)
     # print('order_id', order_id)
