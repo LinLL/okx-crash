@@ -9,15 +9,20 @@ apiKey = config.OKAPI
 secret = config.OKSECRET
 
 # 定义交易对和交易量
-symbol = 'SUI/USDT'
-amount = 0.1
+symbol = config.SYMBOL
+amount = config.SYMBOL_AMOUNT
+sell_price = config.SELL_PRICE
 
 # 初始化 okex API
+#exchange = ccxt.okx
 exchange = ccxt.okex({
     'apiKey': apiKey,
     'secret': secret,
+    'password': config.OK_PASSWD,
     'enableRateLimit': True,  # 启用频率限制
 })
+exchange.set_sandbox_mode(True)
+#exchange.verbose = True
 
 
 # 定义函数，获取市场价格信息
@@ -29,21 +34,22 @@ def get_ticker():
 # 定义函数，发起市价卖单
 def place_sell_order(amount):
     # 获取市场价格
-    bid_price, ask_price = get_ticker()
+    #bid_price, ask_price = get_ticker()
 
     # 设置卖单价格
-    sell_price = bid_price + 0.01
+    #sell_price = bid_price + 0.01
 
     # 发起市价卖单
     order = exchange.create_order(
         symbol=symbol,
-        type='market',
+        type='limit',
         side='sell',
         amount=amount,
-        params={'stopPrice': sell_price},
+        price=sell_price,
+        #params={'stopPrice': sell_price},
     )
-
-    return order['info']['order_id']
+    print(order)
+    return order['id']
 
 
 # 定义函数，查询订单状态
@@ -92,20 +98,21 @@ def countdown():
         format_last_time_string = format_timedelta(delta)
         print("距离开始还差:{}".format(format_last_time_string), end="\r")
         time.sleep(1)
+    print("开始抢挂订单")
 def testMain():
-    print('testMain')
-    #bid_price, ask_price = get_ticker()
-    #print('bid_price', bid_price)
-    #print('ask_price', ask_price)
-    print("test countdown")
-    countdown()
+    # print('testMain')
+    # #bid_price, ask_price = get_ticker()
+    # #print('bid_price', bid_price)
+    # #print('ask_price', ask_price)
+    # print("test countdown")
+    # countdown()
     #print("symbols", get_ok_symbols())
-    # order_id = place_sell_order(amount)
-    # print('order_id', order_id)
-    # status = check_order_status(order_id)
-    # print('status', status)
-    # cancel_order(order_id)
-    # print('cancel_order', order_id)
+    order_id = place_sell_order(amount)
+    print('order_id', order_id)
+    status = check_order_status(order_id)
+    print('status', status)
+    cancel_order(order_id)
+    print('cancel_order', order_id)
 
 # 主程序
 def main():
