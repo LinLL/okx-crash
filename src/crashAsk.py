@@ -3,22 +3,28 @@ import time
 import ccxt
 import config
 import datetime
+from inoutargs import parse_args
+
+args = parse_args()
 
 # 定义 API key 和 secret key
-apiKey = config.OKAPI
-secret = config.OKSECRET
+apiKey = args.api if args.api is not None else config.OKAPI
+secret = args.secret if args.secret is not None else config.OKSECRET
+passwd = args.passwd if args.passwd is not None else config.OK_PASSWD
 
 # 定义交易对和交易量
-symbol = config.SYMBOL
-amount = config.SYMBOL_AMOUNT
-sell_price = config.SELL_PRICE
+symbol = args.symbol if args.symbol is not None else config.SYMBOL
+amount = args.amount if args.amount is not None else config.SYMBOL_AMOUNT
+sell_price = args.sellprice if args.sellprice is not None else config.SELL_PRICE
+
+startTime = args.starttime if args.starttime is not None else config.StartTime
 
 # 初始化 okex API
 #exchange = ccxt.okx
 exchange = ccxt.okex({
     'apiKey': apiKey,
     'secret': secret,
-    'password': config.OK_PASSWD,
+    'password': passwd,
     'enableRateLimit': True,  # 启用频率限制
 })
 exchange.set_sandbox_mode(True)
@@ -89,30 +95,37 @@ def format_timedelta(td):
     return f"{days}天 {hours}小时 {minutes}分钟 {seconds}秒"
 
 def countdown():
-    targetTime = human_to_unixtime(config.StartTime)
+    targetTime = human_to_unixtime(startTime)
     while not compare_time(targetTime):
         #print("等待时间未到达...")
-        last_time = targetTime - int(time.time())
+        # print(targetTime, time.time())
+        last_time = targetTime - float(time.time())
+        haomiao = last_time - int(last_time)
+        # print(haomiao)
         dt = datetime.datetime.now() + datetime.timedelta(seconds=last_time)
         delta = dt - datetime.datetime.now()
+
         format_last_time_string = format_timedelta(delta)
         print("距离开始还差:{}".format(format_last_time_string), end="\r")
-        time.sleep(1)
+        time.sleep(haomiao)
     print("开始抢挂订单")
 def testMain():
     # print('testMain')
     # #bid_price, ask_price = get_ticker()
     # #print('bid_price', bid_price)
     # #print('ask_price', ask_price)
-    # print("test countdown")
-    # countdown()
+    print("test countdown")
+    countdown()
+
     #print("symbols", get_ok_symbols())
+
+    #测试下单
     order_id = place_sell_order(amount)
     print('order_id', order_id)
     status = check_order_status(order_id)
     print('status', status)
-    cancel_order(order_id)
-    print('cancel_order', order_id)
+    # cancel_order(order_id)
+    # print('cancel_order', order_id)
 
 # 主程序
 def main():
