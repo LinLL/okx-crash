@@ -132,7 +132,7 @@ def countdown():
         print("距离开始还差:{}".format(format_last_time_string), end="\r")
         time.sleep(haomiao)
     print("开始抢挂订单")
-def testMain():
+def Main():
 
     #开始计时
     countdown()
@@ -169,5 +169,5 @@ def testMain():
 
 
 if __name__ == '__main__':
-    testMain()
+    Main()
     # main()
