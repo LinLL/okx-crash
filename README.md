@@ -1,6 +1,7 @@
 # okx-crash
 OKX平台的挂单抢卖小程序
 
+```
 usage: main.py [-h] [-a API] [-s SECRET] [-p PASSWD] [-t STARTTIME] [-m SYMBOL] [-n AMOUNT] [-r SELLPRICE] [-o STOPPRICE] [-d DISCOUNT] [-x PROXY]
 
 OKX 抢卖程序
@@ -26,3 +27,5 @@ optional arguments:
                         卖一折扣卖价, 例如"0.8"
   -x PROXY, --proxy PROXY
                         代理, 例如"http://127.0.0.1:7890
+                    
+```
