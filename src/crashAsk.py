@@ -11,6 +11,7 @@ args = parse_args()
 apiKey = args.api if args.api is not None else config.OKAPI
 secret = args.secret if args.secret is not None else config.OKSECRET
 passwd = args.passwd if args.passwd is not None else config.OK_PASSWD
+proxy = args.proxy if args.proxy is not None else config.PROXY
 
 # 定义交易对和交易量
 symbol = args.symbol if args.symbol is not None else config.SYMBOL
@@ -18,6 +19,8 @@ amount = args.amount if args.amount is not None else config.SYMBOL_AMOUNT
 sell_price = args.sellprice if args.sellprice is not None else config.SELL_PRICE
 stop_price = args.stopprice if args.stopprice is not None else config.STOP_PRICE
 startTime = args.starttime if args.starttime is not None else config.StartTime
+discount = args.discount if args.discount is not None else config.DISCOUNT
+
 
 # 初始化 okex API
 #exchange = ccxt.okx
@@ -25,7 +28,11 @@ exchange = ccxt.okex({
     'apiKey': apiKey,
     'secret': secret,
     'password': passwd,
-    'enableRateLimit': True,  # 启用频率限制
+    'enableRateLimit': True,  # 启用频率限制'
+    'proxies': {
+        'http': proxy,
+        'https': proxy,
+    }
 })
 exchange.set_sandbox_mode(True)
 #exchange.verbose = True
@@ -41,9 +48,10 @@ def get_ticker():
 def place_sell_order(amount):
     # 获取市场价格
     bid_price, ask_price = get_ticker()
+    print(f"买一:{bid_price},卖一:{ask_price}")
 
     # 设置卖单价格
-    sell_price = 0.8*ask_price
+    sell_price = discount*ask_price
     if sell_price < stop_price:
         sell_price = stop_price
         print("卖单价格低于最低卖价，以最低价挂单")
@@ -64,12 +72,24 @@ def place_sell_order(amount):
 # 定义函数，查询订单状态
 def check_order_status(order_id):
     order = exchange.fetch_order(order_id, symbol)
-    return order['status']
+    order_status = order['info']['state']
+
+    #print(f"order infor: {order}")
+    if order_status == "live":
+        print("订单未完全执行，继续等待", end="\r")
+
+    elif order_status == "filled":
+        print(f"订单状态:{order['info']['state']}，订单成交价格:{order['info']['fillPx']},"
+              f"成交数量:{order['info']['fillSz']},成交金额:{float(order['info']['fillSz'])*float(order['info']['fillPx'])}")
+
+    return order_status
+
 
 
 # 定义函数，取消订单
 def cancel_order(order_id):
-    exchange.cancel_order(order_id, symbol)
+    result = exchange.cancel_order(order_id, symbol)
+    return result
 
 def get_ok_symbols():
     return exchange.symbols
@@ -104,7 +124,7 @@ def countdown():
         # print(targetTime, time.time())
         last_time = targetTime - float(time.time())
         haomiao = last_time - int(last_time)
-        # print(haomiao)
+
         dt = datetime.datetime.now() + datetime.timedelta(seconds=last_time)
         delta = dt - datetime.datetime.now()
 
@@ -113,24 +133,38 @@ def countdown():
         time.sleep(haomiao)
     print("开始抢挂订单")
 def testMain():
-    # print('testMain')
-    # #bid_price, ask_price = get_ticker()
-    # #print('bid_price', bid_price)
-    # #print('ask_price', ask_price)
-    print("test countdown")
+
+    #开始计时
     countdown()
 
     #print("symbols", get_ok_symbols())
 
-    #测试下单
-    bid_price, ask_price = get_ticker()
-    print(f"买一:{bid_price},卖一:{ask_price}", )
-    order_id = place_sell_order(amount)
-    print('order_id', order_id)
-    status = check_order_status(order_id)
-    print('status', status)
-    # cancel_order(order_id)
-    # print('cancel_order', order_id)
+    #下单
+    loop_num = 0
+    while True:
+        if loop_num%3 == 0:
+
+            order_id = place_sell_order(amount)
+        status = check_order_status(order_id)
+        if status == 'filled':
+            print('市价卖单已成交，订单号：', order_id)
+            break
+        elif status == "live":
+            loop_num += 1
+        if loop_num%3 == 0:
+            print(f"取消订单{order_id}")
+            try:
+                cancel_order(order_id)
+            except ccxt.base.errors.OrderNotFound as e:
+                print(e)
+                print("订单在取消前已完成")
+
+            status = check_order_status(order_id)
+            print(f"订单状态{status}")
+            print(f"已经等待3秒重新挂单", end="\r")
+
+        time.sleep(1)
+
 
 # 主程序
 def main():
