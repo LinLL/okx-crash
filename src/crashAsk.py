@@ -166,35 +166,7 @@ def testMain():
         time.sleep(1)
 
 
-# 主程序
-def main():
-    while True:
-        # 获取市场价格
-        bid_price, ask_price = get_ticker()
 
-        # 如果市场价格超过预期价格，发起市价卖单
-        if ask_price > 2500:
-            print('市场价格超过2500，发起抢卖...')
-            order_id = place_sell_order(amount)
-            print('已发起市价卖单，订单号：', order_id)
-
-            # 等待订单成交
-            while True:
-                status = check_order_status(order_id)
-                if status == 'closed':
-                    print('市价卖单已成交，订单号：', order_id)
-                    break
-                else:
-                    time.sleep(1)
-                    print('订单状态：', status)
-
-            # 取消未成交的订单
-            if status != 'closed':
-                print('市价卖单未成交，取消订单：', order_id)
-                cancel_order(order_id)
-
-        # 每隔一段时间检查一次市场价格
-        time.sleep(10)
 
 if __name__ == '__main__':
     testMain()
