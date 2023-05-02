@@ -8,7 +8,8 @@ def parse_args():
     parser.add_argument("-t", "--starttime", type=str, help="开始时间, 例如\"2023/5/01 15:44:00\"")
     parser.add_argument("-m", "--symbol", type=str, help="交易对, 例如\"OKB/USDT\"")
     parser.add_argument("-n", "--amount", type=str, help="交易量, 例如\"1\"")
-    parser.add_argument("-r", "--sellprice", type=str, help="卖出价格, 例如\"46.3\"")
+    parser.add_argument("-r", "--sellprice", type=float, help="卖出价格, 例如\"46.3\"")
+    parser.add_argument("-o", "--stopprice", type=float, help="最低卖价,低于此价格不会挂单 例如\"1\"")
     return parser.parse_args()
 
 if __name__ == '__main__':

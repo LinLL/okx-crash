@@ -16,7 +16,7 @@ passwd = args.passwd if args.passwd is not None else config.OK_PASSWD
 symbol = args.symbol if args.symbol is not None else config.SYMBOL
 amount = args.amount if args.amount is not None else config.SYMBOL_AMOUNT
 sell_price = args.sellprice if args.sellprice is not None else config.SELL_PRICE
-
+stop_price = args.stopprice if args.stopprice is not None else config.STOP_PRICE
 startTime = args.starttime if args.starttime is not None else config.StartTime
 
 # 初始化 okex API
@@ -40,10 +40,13 @@ def get_ticker():
 # 定义函数，发起市价卖单
 def place_sell_order(amount):
     # 获取市场价格
-    #bid_price, ask_price = get_ticker()
+    bid_price, ask_price = get_ticker()
 
     # 设置卖单价格
-    #sell_price = bid_price + 0.01
+    sell_price = 0.8*ask_price
+    if sell_price < stop_price:
+        sell_price = stop_price
+        print("卖单价格低于最低卖价，以最低价挂单")
 
     # 发起市价卖单
     order = exchange.create_order(
@@ -54,7 +57,7 @@ def place_sell_order(amount):
         price=sell_price,
         #params={'stopPrice': sell_price},
     )
-    print(order)
+    print("挂了卖单：{},价格：{}".format(order['id'], sell_price))
     return order['id']
 
 
@@ -120,6 +123,8 @@ def testMain():
     #print("symbols", get_ok_symbols())
 
     #测试下单
+    bid_price, ask_price = get_ticker()
+    print(f"买一:{bid_price},卖一:{ask_price}", )
     order_id = place_sell_order(amount)
     print('order_id', order_id)
     status = check_order_status(order_id)
