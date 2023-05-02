@@ -1,25 +1,25 @@
 import json
 import time
 import ccxt
-import config
+from src.config import *
 import datetime
-from inoutargs import parse_args
+from src.inoutargs import parse_args
 
 args = parse_args()
 
 # 定义 API key 和 secret key
-apiKey = args.api if args.api is not None else config.OKAPI
-secret = args.secret if args.secret is not None else config.OKSECRET
-passwd = args.passwd if args.passwd is not None else config.OK_PASSWD
-proxy = args.proxy if args.proxy is not None else config.PROXY
+apiKey = args.api if args.api is not None else OKAPI
+secret = args.secret if args.secret is not None else OKSECRET
+passwd = args.passwd if args.passwd is not None else OK_PASSWD
+proxy = args.proxy if args.proxy is not None else PROXY
 
 # 定义交易对和交易量
-symbol = args.symbol if args.symbol is not None else config.SYMBOL
-amount = args.amount if args.amount is not None else config.SYMBOL_AMOUNT
-sell_price = args.sellprice if args.sellprice is not None else config.SELL_PRICE
-stop_price = args.stopprice if args.stopprice is not None else config.STOP_PRICE
-startTime = args.starttime if args.starttime is not None else config.StartTime
-discount = args.discount if args.discount is not None else config.DISCOUNT
+symbol = args.symbol if args.symbol is not None else SYMBOL
+amount = args.amount if args.amount is not None else SYMBOL_AMOUNT
+sell_price = args.sellprice if args.sellprice is not None else SELL_PRICE
+stop_price = args.stopprice if args.stopprice is not None else STOP_PRICE
+startTime = args.starttime if args.starttime is not None else StartTime
+discount = args.discount if args.discount is not None else DISCOUNT
 
 
 # 初始化 okex API
